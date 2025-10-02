@@ -2,28 +2,12 @@
 
 import React, { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
-import { CalendarIcon, Clock, ArrowLeft, Users, List , Briefcase} from 'lucide-react';
-
-
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowLeft, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useRouter } from 'next/navigation';
 
 const interviewTypes = [
@@ -36,9 +20,12 @@ const interviewTypes = [
   { id: "design", name: "UX/UI Design" },
 ];
 
-const timeSlots = [
-  "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", 
-  "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM"
+const timeSlots = ["09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM"];
+
+const steps = [
+  { n: 1, label: "Interview type" },
+  { n: 2, label: "Date & time" },
+  { n: 3, label: "Details" },
 ];
 
 const ScheduleSession = () => {
@@ -54,192 +41,169 @@ const ScheduleSession = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
-      // Show success and redirect
-      router.push('/dashboard');
-    }, 1500);
+    setTimeout(() => { setLoading(false); router.push('/dashboard'); }, 1500);
   };
 
   const goBack = () => {
-    if (step > 1) {
-      setStep(step - 1);
-    } else {
-      router.push('/dashboard');
-    }
+    if (step > 1) setStep(step - 1);
+    else router.push('/dashboard');
   };
 
   return (
-    <div className="p-5 md:p-10 max-w-7xl mx-auto">
-      <Button 
-        variant="ghost" 
-        className="mb-6" 
-        onClick={goBack}
-      >
-        <ArrowLeft className="h-4 w-4 mr-2" /> Back
+    <div className="mx-auto max-w-7xl px-5 py-12 md:px-10 md:py-16">
+      <Button variant="ghost" className="mb-6 -ml-2" onClick={goBack}>
+        <ArrowLeft className="h-4 w-4" /> Back
       </Button>
-      
-      <div className="mb-8">
-        <h2 className="font-bold text-3xl text-primary">Schedule Interview Session</h2>
-        <p className="text-muted-foreground">Plan your next mock interview with our AI system</p>
+
+      <div className="mb-10">
+        <p className="eyebrow">Schedule</p>
+        <h1 className="font-display text-display mt-3 text-foreground">Plan your next session.</h1>
+        <p className="measure mt-3 text-lg text-muted-foreground">
+          Three quick steps and it&apos;s on the calendar.
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Progress Sidebar */}
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle>Setup Progress</CardTitle>
-            <CardDescription>Complete all steps to schedule your session</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className={`flex items-center space-x-2 ${step >= 1 ? 'text-primary' : 'text-muted-foreground'}`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>1</div>
-                <span className="font-medium">Choose Interview Type</span>
-              </div>
-              <div className={`flex items-center space-x-2 ${step >= 2 ? 'text-primary' : 'text-muted-foreground'}`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 2 ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>2</div>
-                <span className="font-medium">Select Date & Time</span>
-              </div>
-              <div className={`flex items-center space-x-2 ${step >= 3 ? 'text-primary' : 'text-muted-foreground'}`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 3 ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>3</div>
-                <span className="font-medium">Add Details</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[260px_1fr]">
+        {/* Step rail */}
+        <ol className="flex gap-6 lg:flex-col lg:gap-0">
+          {steps.map((s, i) => {
+            const done = step > s.n;
+            const active = step === s.n;
+            return (
+              <li key={s.n} className={`flex items-center gap-3 lg:py-4 ${i > 0 ? 'lg:border-t lg:border-border' : ''}`}>
+                <span className={cnStep(done, active)}>
+                  {done ? <Check className="h-4 w-4" /> : s.n}
+                </span>
+                <span className={`text-sm font-semibold ${active || done ? 'text-foreground' : 'text-muted-foreground'}`}>
+                  {s.label}
+                </span>
+              </li>
+            );
+          })}
+        </ol>
 
-        {/* Main Content Area */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>
-              {step === 1 && "Select Interview Type"}
-              {step === 2 && "Choose Date and Time"}
-              {step === 3 && "Interview Details"}
-            </CardTitle>
-            <CardDescription>
-              {step === 1 && "What kind of interview would you like to practice?"}
-              {step === 2 && "When would you like to schedule your interview?"}
-              {step === 3 && "Add a title and any preparation notes"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit}>
-              {/* Step 1: Interview Type */}
-              {step === 1 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {interviewTypes.map((type) => (
-                    <div 
+        {/* Content */}
+        <div className="rounded-lg border border-border bg-card p-6 md:p-8">
+          <div className="border-b border-border pb-5">
+            <h2 className="font-display text-2xl text-foreground">
+              {step === 1 && "What would you like to practice?"}
+              {step === 2 && "Pick a date and time"}
+              {step === 3 && "A few last details"}
+            </h2>
+          </div>
+
+          <form onSubmit={handleSubmit} className="pt-6">
+            {/* Step 1 */}
+            {step === 1 && (
+              <div className="overflow-hidden rounded-lg border border-border">
+                {interviewTypes.map((type, i) => {
+                  const selected = interviewType === type.id;
+                  return (
+                    <button
                       key={type.id}
-                      className={`p-4 border rounded-lg cursor-pointer transition-all hover:border-primary ${interviewType === type.id ? 'border-primary bg-primary/5' : 'border-border'}`}
+                      type="button"
                       onClick={() => setInterviewType(type.id)}
+                      className={`flex w-full items-center justify-between p-4 text-left transition-colors ${i > 0 ? 'border-t border-border' : ''} ${selected ? 'bg-accent/40' : 'hover:bg-accent/30'}`}
                     >
-                      <div className="flex items-center space-x-3">
-                        <Briefcase className={`h-5 w-5 ${interviewType === type.id ? 'text-primary' : 'text-muted-foreground'}`} />
-                        <span className="font-medium">{type.name}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                      <span className="font-medium text-foreground">{type.name}</span>
+                      <span className={`flex h-5 w-5 items-center justify-center rounded-full border ${selected ? 'border-primary bg-primary text-primary-foreground' : 'border-border'}`}>
+                        {selected && <Check className="h-3 w-3" />}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
 
-              {/* Step 2: Date and Time Selection */}
-              {step === 2 && (
-                <div className="flex flex-col space-y-6">
-                  <div>
-                    <Label className="mb-2 block">Select Date</Label>
-                    <Calendar
-                      mode="single"
-                      selected={date}
-                      onSelect={setDate}
-                      className="border rounded-md p-4"
-                      disabled={(date) => date < new Date()}
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label className="mb-2 block">Select Time Slot</Label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {timeSlots.map((time) => (
-                        <div
+            {/* Step 2 */}
+            {step === 2 && (
+              <div className="space-y-8">
+                <div>
+                  <Label className="eyebrow mb-3 block">Date</Label>
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    className="rounded-lg border border-border p-4"
+                    disabled={(d) => d < new Date()}
+                  />
+                </div>
+                <div>
+                  <Label className="eyebrow mb-3 block">Time slot</Label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {timeSlots.map((time) => {
+                      const selected = timeSlot === time;
+                      return (
+                        <button
                           key={time}
-                          className={`p-2 border rounded-md text-center cursor-pointer ${timeSlot === time ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}
+                          type="button"
                           onClick={() => setTimeSlot(time)}
+                          className={`nums rounded-md border p-2.5 text-center text-sm transition-colors ${selected ? 'border-primary bg-primary text-primary-foreground' : 'border-border hover:bg-accent/40'}`}
                         >
                           {time}
-                        </div>
-                      ))}
-                    </div>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* Step 3: Additional Details */}
-              {step === 3 && (
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="title">Interview Title</Label>
-                    <Input 
-                      id="title" 
-                      placeholder="e.g., React Developer Interview Practice" 
-                      value={title} 
-                      onChange={(e) => setTitle(e.target.value)}
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="experience-level">Experience Level</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select experience level" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="junior">Junior (0-2 years)</SelectItem>
-                        <SelectItem value="mid">Mid-level (3-5 years)</SelectItem>
-                        <SelectItem value="senior">Senior (5+ years)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="notes">Preparation Notes</Label>
-                    <Textarea 
-                      id="notes" 
-                      placeholder="Add any specific topics you'd like to cover or technologies to focus on..." 
-                      rows={4}
-                      value={notes} 
-                      onChange={(e) => setNotes(e.target.value)}
-                    />
-                  </div>
+            {/* Step 3 */}
+            {step === 3 && (
+              <div className="space-y-5">
+                <div className="space-y-1.5">
+                  <Label htmlFor="title">Session title</Label>
+                  <Input id="title" placeholder="e.g. React Developer interview practice" value={title} onChange={(e) => setTitle(e.target.value)} />
                 </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="experience-level">Experience level</Label>
+                  <Select>
+                    <SelectTrigger><SelectValue placeholder="Select experience level" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="junior">Junior (0–2 years)</SelectItem>
+                      <SelectItem value="mid">Mid-level (3–5 years)</SelectItem>
+                      <SelectItem value="senior">Senior (5+ years)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="notes">Preparation notes</Label>
+                  <Textarea id="notes" placeholder="Any specific topics or technologies to focus on…" rows={4} value={notes} onChange={(e) => setNotes(e.target.value)} />
+                </div>
+              </div>
+            )}
+
+            <div className="mt-8 flex justify-between border-t border-border pt-6">
+              {step > 1 ? (
+                <Button type="button" variant="outline" onClick={() => setStep(step - 1)}>Previous</Button>
+              ) : <span />}
+              {step < 3 ? (
+                <Button
+                  type="button"
+                  onClick={() => setStep(step + 1)}
+                  disabled={(step === 1 && !interviewType) || (step === 2 && (!date || !timeSlot))}
+                >
+                  Continue
+                </Button>
+              ) : (
+                <Button type="submit" disabled={loading || !title}>
+                  {loading ? 'Scheduling…' : 'Schedule session'}
+                </Button>
               )}
-            </form>
-          </CardContent>
-          <CardFooter className="flex justify-between">
-            {step > 1 && (
-              <Button variant="outline" onClick={() => setStep(step - 1)}>
-                Previous
-              </Button>
-            )}
-            {step < 3 ? (
-              <Button 
-                onClick={() => setStep(step + 1)} 
-                disabled={(step === 1 && !interviewType) || (step === 2 && (!date || !timeSlot))}
-              >
-                Continue
-              </Button>
-            ) : (
-              <Button type="submit" onClick={handleSubmit} disabled={loading || !title}>
-                {loading ? 'Scheduling...' : 'Schedule Interview'}
-              </Button>
-            )}
-          </CardFooter>
-        </Card>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
 };
+
+function cnStep(done, active) {
+  const base = "nums flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold";
+  if (done) return `${base} bg-primary text-primary-foreground`;
+  if (active) return `${base} border border-primary text-primary`;
+  return `${base} border border-border text-muted-foreground`;
+}
 
 export default ScheduleSession;
