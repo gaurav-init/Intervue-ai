@@ -1,78 +1,65 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { Calendar,  Award, ArrowRight, Briefcase, BarChart2 } from 'lucide-react';
-
+import { ArrowRight, BarChart2, Clock } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 
 function InterviewItemCard({ interview }) {
   const router = useRouter();
-  
-  const onStart = () => {
-    router.push('/dashboard/interview/' + interview?.mockId);
-  };
-  
-  const onFeedbackPress = () => {
-    router.push('/dashboard/interview/' + interview.mockId + "/feedback");
-  };
-  
-  // Parse job description to create technology badges
-  const technologies = interview?.jobDesc?.split(',').map(tech => tech.trim()) || [];
-  
+
+  const onStart = () => router.push('/dashboard/interview/' + interview?.mockId);
+  const onFeedbackPress = () =>
+    router.push('/dashboard/interview/' + interview.mockId + '/feedback');
+
+  const technologies =
+    interview?.jobDesc?.split(',').map((tech) => tech.trim()).filter(Boolean) || [];
+
   return (
-    <Card className="hover:shadow-lg transition-all duration-300 overflow-hidden border-t-4 border-t-primary">
-      <CardHeader className="p-4 pb-0">
-        <div className="flex justify-between items-start">
-          <div>
-            <h2 className="font-bold text-lg text-primary">{interview?.jobPosition}</h2>
-            <div className="flex items-center gap-1 text-sm text-gray-600 mt-1">
-              < Briefcase size={14} />
-              <span>{interview?.jobExperience} Years of Experience</span>
-            </div>
-          </div>
-          <Badge variant="outline" className="flex items-center gap-1">
-            <Calendar size={14} />
-            {interview.createdAt}
+    <div className="group flex flex-col rounded-lg border border-border bg-card p-5 transition-all duration-200 hover:border-foreground/20 hover:shadow-sheet">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h3 className="text-lg font-bold leading-tight tracking-tight text-foreground">
+            {interview?.jobPosition}
+          </h3>
+          <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+            <Clock size={14} />
+            <span className="nums">{interview?.jobExperience}</span> yrs experience
+          </p>
+        </div>
+        <span className="nums shrink-0 text-xs text-muted-foreground">
+          {interview.createdAt}
+        </span>
+      </div>
+
+      <div className="mt-4 flex flex-1 flex-wrap content-start gap-1.5">
+        {technologies.slice(0, 4).map((tech, index) => (
+          <Badge key={index} variant="secondary" className="font-medium">
+            {tech}
           </Badge>
-        </div>
-      </CardHeader>
-      
-      <CardContent className="p-4">
-        <div className="flex flex-wrap gap-2 mt-2">
-          {technologies.slice(0, 4).map((tech, index) => (
-            <Badge key={index} variant="secondary" className="text-xs">
-              {tech}
-            </Badge>
-          ))}
-          {technologies.length > 4 && (
-            <Badge variant="secondary" className="text-xs">
-              +{technologies.length - 4} more
-            </Badge>
-          )}
-        </div>
-      </CardContent>
-      
-      <CardFooter className="p-4 pt-0 flex justify-between gap-3">
-        <Button 
-          size="sm" 
-          variant="outline" 
-          className="w-full flex items-center gap-2 hover:border-primary hover:text-primary transition-colors"
+        ))}
+        {technologies.length > 4 && (
+          <Badge variant="outline" className="text-muted-foreground">
+            +{technologies.length - 4}
+          </Badge>
+        )}
+      </div>
+
+      <div className="mt-5 flex gap-2 border-t border-border pt-4">
+        <Button
+          size="sm"
+          variant="outline"
+          className="flex-1"
           onClick={onFeedbackPress}
         >
-          <BarChart2 size={16} />
+          <BarChart2 size={15} />
           Feedback
         </Button>
-        <Button 
-          size="sm" 
-          className="w-full flex items-center gap-2 bg-primary hover:bg-primary/90"
-          onClick={onStart}
-        >
+        <Button size="sm" className="flex-1" onClick={onStart}>
           Start
-          <ArrowRight size={16} />
+          <ArrowRight size={15} />
         </Button>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 }
 
