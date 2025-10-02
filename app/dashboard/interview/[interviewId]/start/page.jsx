@@ -102,27 +102,33 @@ function StartInterview({ params }) {
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
       {/* Header with progress */}
-      <div className="space-y-4">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="space-y-5">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 className="text-2xl font-bold">{interviewData?.interviewTitle || "Mock Interview"}</h1>
-            <p className="text-muted-foreground">
-              Question {activeQuestionIndex + 1} of {mockInterviewQuestion?.length}
+            <p className="eyebrow">Live session</p>
+            <h1 className="font-display mt-2 text-3xl text-foreground">
+              {interviewData?.jobPosition || interviewData?.interviewTitle || 'Mock interview'}
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Question <span className="nums">{activeQuestionIndex + 1}</span> of{' '}
+              <span className="nums">{mockInterviewQuestion?.length}</span>
             </p>
           </div>
-          
-          <div className="flex items-center gap-3">
+
+          <div className="flex w-fit items-center gap-2 rounded-full border border-border bg-card px-3.5 py-1.5">
             <Clock className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">{formatTime(timeElapsed)} elapsed</span>
+            <span className="nums text-sm font-medium text-foreground">
+              {formatTime(timeElapsed)}
+            </span>
           </div>
         </div>
-        
+
         <div className="space-y-2">
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <span>Progress</span>
-            <span>{progressPercentage}%</span>
+          <div className="flex justify-between">
+            <span className="eyebrow">Progress</span>
+            <span className="nums text-xs text-muted-foreground">{progressPercentage}%</span>
           </div>
-          <Progress value={progressPercentage} className="h-2" />
+          <Progress value={progressPercentage} className="h-1.5" />
         </div>
       </div>
 
@@ -131,16 +137,17 @@ function StartInterview({ params }) {
         <Card className="md:max-h-[100vh] ">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <span>Question {activeQuestionIndex + 1}</span>
-              {mockInterviewQuestion[activeQuestionIndex]?.answered && 
-                <CheckCircle className="h-4 w-4 text-green-500" />
+              <span>The question</span>
+              {mockInterviewQuestion[activeQuestionIndex]?.answered &&
+                <CheckCircle className="h-4 w-4 text-primary" />
               }
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <QuestionsSection 
+            <QuestionsSection
               mockInterviewQuestion={mockInterviewQuestion}
               activeQuestionIndex={activeQuestionIndex}
+              setActiveQuestionIndex={setActiveQuestionIndex}
             />
           </CardContent>
         </Card>
