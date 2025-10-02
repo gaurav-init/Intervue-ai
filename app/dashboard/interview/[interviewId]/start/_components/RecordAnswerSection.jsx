@@ -150,7 +150,7 @@ function RecordAnswerSection({mockInterviewQuestion, activeQuestionIndex, interv
     return (
         <div className="space-y-6">
             {/* Camera/Webcam Section */}
-            <Card className={`overflow-hidden bg-black/5 dark:bg-black/20 border-0 ${!showCamera ? 'hidden' : ''}`}>
+            <Card className={`overflow-hidden border border-border bg-secondary/40 ${!showCamera ? 'hidden' : ''}`}>
                 <CardContent className="p-0 relative aspect-video flex items-center justify-center">
                     {!showCamera ? (
                         <div className="flex flex-col items-center justify-center h-full space-y-2 p-8">
