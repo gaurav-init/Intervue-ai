@@ -1,94 +1,90 @@
-// pages/sign-in.js
 import { SignIn } from '@clerk/nextjs';
-import { ArrowRight, ShieldCheck, Zap, BarChart } from 'lucide-react';
+import Link from 'next/link';
+
+const clerkAppearance = {
+  elements: {
+    rootBox: 'w-full',
+    card: 'shadow-none bg-transparent p-0',
+    headerTitle: 'hidden',
+    headerSubtitle: 'hidden',
+    socialButtonsBlockButton:
+      'border border-border bg-card hover:bg-accent/40 text-foreground',
+    dividerLine: 'bg-border',
+    dividerText: 'text-muted-foreground',
+    formFieldLabel: 'text-foreground font-medium',
+    formFieldInput:
+      'border-input bg-background focus:ring-2 focus:ring-ring/40',
+    formButtonPrimary:
+      'bg-primary hover:bg-primary/90 text-primary-foreground font-semibold normal-case',
+    footerActionLink: 'text-primary hover:text-primary/80',
+  },
+};
 
 export default function SignInPage() {
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-      {/* Left side - sign in form */}
-      <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-6 md:p-12 order-2 lg:order-1">
+    <div className="flex min-h-screen bg-background">
+      {/* Brand panel */}
+      <aside className="relative hidden flex-col justify-between bg-ink p-12 text-ink-foreground lg:flex lg:w-1/2">
+        <Link href="/" className="flex items-baseline gap-2">
+          <span className="font-display text-3xl leading-none tracking-tight">
+            Intervue
+          </span>
+          <span className="text-sm font-bold uppercase tracking-[0.2em] text-primary">
+            AI
+          </span>
+        </Link>
+
+        <div className="max-w-md">
+          <p className="eyebrow !text-ink-foreground/45">Welcome back</p>
+          <h1 className="font-display mt-4 text-4xl leading-tight xl:text-5xl">
+            The room is waiting. Let&apos;s rehearse it once more.
+          </h1>
+          <p className="measure mt-6 text-ink-foreground/70">
+            Pick up where you left off — your sessions, your scores, and the
+            notes on what to tighten next.
+          </p>
+        </div>
+
+        <figure className="max-w-md border-t border-ink-foreground/15 pt-6">
+          <blockquote className="font-display text-xl leading-snug">
+            “By the real interview I wasn&apos;t nervous — I&apos;d already had
+            the conversation.”
+          </blockquote>
+          <figcaption className="mt-3 text-sm text-ink-foreground/55">
+            Sarah J. · Software Engineer, Google
+          </figcaption>
+        </figure>
+      </aside>
+
+      {/* Form */}
+      <main className="flex w-full flex-col items-center justify-center px-6 py-12 md:px-12 lg:w-1/2">
         <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold">Welcome back</h2>
-            <p className="text-muted-foreground mt-2">
-              Sign in to continue to your InterviewAI dashboard
-            </p>
+          <div className="mb-8 lg:hidden">
+            <Link href="/" className="flex items-baseline gap-2">
+              <span className="font-display text-2xl tracking-tight text-foreground">
+                Intervue
+              </span>
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary">
+                AI
+              </span>
+            </Link>
           </div>
-          
-          <div className="bg-card border rounded-xl shadow-sm ">
-            <SignIn 
-              appearance={{
-                elements: {
-                  rootBox: "w-full",
-                  card: "shadow-none ",
-                  headerTitle: "hidden",
-                  headerSubtitle: "hidden",
-                  formButtonPrimary: "bg-primary hover:bg-primary/90 text-white   rounded-md flex items-center justify-center font-medium"
-                }
-              }}
-            />
-          </div>
-          
-         
-        </div>
-      </div>
-      
-      {/* Right side - stats and metrics */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col p-12 bg-primary/5 order-1 lg:order-2 justify-center">
-        <div className="max-w-md mx-auto">
-          <h1 className="text-3xl font-bold text-primary mb-2">InterviewAI</h1>
-          <p className="text-xl text-muted-foreground mb-8">Your hiring metrics this month</p>
-          
-          <div className="grid grid-cols-2 gap-6 mb-8">
-            <div className="bg-card border rounded-xl p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <p className="text-muted-foreground text-sm">Interviews Conducted</p>
-                  <h3 className="text-3xl font-bold">42</h3>
-                </div>
-                <div className="bg-primary/10 p-2 rounded-lg">
-                  <BarChart className="h-5 w-5 text-primary" />
-                </div>
-              </div>
-              <div className="text-sm text-green-600 flex items-center">
-                <span>↑ 12% from last month</span>
-              </div>
-            </div>
-            
-            <div className="bg-card border rounded-xl p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <p className="text-muted-foreground text-sm">Time Saved</p>
-                  <h3 className="text-3xl font-bold">18h</h3>
-                </div>
-                <div className="bg-primary/10 p-2 rounded-lg">
-                  <Zap className="h-5 w-5 text-primary" />
-                </div>
-              </div>
-              <div className="text-sm text-green-600 flex items-center">
-                <span>↑ 24% from last month</span>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-card border rounded-xl p-6">
-            <h3 className="font-medium mb-4 flex items-center">
-              <ShieldCheck className="h-5 w-5 text-primary mr-2" />
-              Your secure dashboard is waiting
-            </h3>
-            <p className="text-muted-foreground text-sm mb-4">
-              Sign in to access your full interviewing toolkit, view recent candidate 
-              assessments, and collaborate with your team.
-            </p>
-            <div className="flex">
-              <a href="/sign-in" className="text-primary flex items-center text-sm font-medium hover:underline">
-                Go to dashboard
-                <ArrowRight className="ml-1 h-4 w-4" />
-              </a>
-            </div>
+          <p className="eyebrow">Sign in</p>
+          <h2 className="font-display mt-2 text-3xl text-foreground">
+            Continue your prep
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            New here?{' '}
+            <Link href="/sign-up" className="font-semibold text-primary hover:underline">
+              Create an account
+            </Link>
+          </p>
+
+          <div className="mt-8">
+            <SignIn appearance={clerkAppearance} />
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

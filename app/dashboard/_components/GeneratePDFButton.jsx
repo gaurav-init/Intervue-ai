@@ -98,7 +98,7 @@ export const GeneratePDFButton = ({
         pdf.setGState(new pdf.GState({opacity: 0.1}));
         
         // Set text properties for watermark
-        pdf.setTextColor(100, 100, 180);
+        pdf.setTextColor(192, 96, 26);
         pdf.setFontSize(50);
         pdf.setFont('helvetica', 'bold');
         
@@ -132,16 +132,16 @@ export const GeneratePDFButton = ({
                 pdf.addImage(logoData, 'PNG', margins, margins, 15, 10, '', 'FAST');
             } catch (e) {
                 console.warn('Error adding logo to PDF:', e);
-                pdf.setFillColor(60, 100, 255);
+                pdf.setFillColor(192, 96, 26);
                 pdf.rect(margins, margins, 15, 10, 'F');
             }
         } else {
-            pdf.setFillColor(60, 100, 255);
+            pdf.setFillColor(192, 96, 26);
             pdf.rect(margins, margins, 15, 10, 'F');
         }
         
         // Organization name on the left
-        pdf.setTextColor(40, 80, 160);
+        pdf.setTextColor(58, 51, 43);
         pdf.setFont('helvetica', 'bold');
         pdf.setFontSize(16);
         pdf.text(organizationName, margins + 20, margins + 7);
@@ -156,11 +156,11 @@ export const GeneratePDFButton = ({
         pdf.text(docIdText, pageWidth - margins - textWidth, margins + 7);
     
         // Decorative lines
-        pdf.setDrawColor(60, 100, 220);
+        pdf.setDrawColor(192, 96, 26);
         pdf.setLineWidth(0.7);
         pdf.line(margins, margins + 18, pageWidth - margins, margins + 18);
         
-        pdf.setDrawColor(200, 220, 250);
+        pdf.setDrawColor(231, 225, 214);
         pdf.setLineWidth(0.3);
         pdf.line(margins, margins + 20, pageWidth - margins, margins + 20);
     };
@@ -170,12 +170,12 @@ export const GeneratePDFButton = ({
       // Function to add footer with authentication info and better design
       const addFooter = (pageNum, docId) => {
         // Add decorative footer line
-        pdf.setDrawColor(60, 100, 220);
+        pdf.setDrawColor(192, 96, 26);
         pdf.setLineWidth(0.7);
         pdf.line(margins, pageHeight - margins - 15, pageWidth - margins, pageHeight - margins - 15);
         
         // Add subtle secondary line
-        pdf.setDrawColor(200, 220, 250);
+        pdf.setDrawColor(231, 225, 214);
         pdf.setLineWidth(0.3);
         pdf.line(margins, pageHeight - margins - 13, pageWidth - margins, pageHeight - margins - 13);
         
@@ -287,20 +287,19 @@ export const GeneratePDFButton = ({
   };
   
   return (
-    <Button 
-      onClick={handleGeneratePDF} 
-      className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium px-4 py-2 rounded-md shadow transition-all duration-300"
+    <Button
+      onClick={handleGeneratePDF}
       disabled={isGenerating}
     >
       {isGenerating ? (
         <>
           <Loader2 className="h-4 w-4 animate-spin" />
-          <span>Creating Your Professional Report...</span>
+          <span>Preparing report…</span>
         </>
       ) : (
         <>
-          <FileCheck className="h-4 w-4" />
-          <span>Download Authenticated Feedback</span>
+          <Download className="h-4 w-4" />
+          <span>Download report</span>
         </>
       )}
     </Button>

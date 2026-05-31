@@ -97,19 +97,24 @@ function AddNewInterview() {
 
   return (
     <div>
-      <Card 
-        className="p-6 border rounded-lg bg-gradient-to-br from-primary/5 to-primary/10
-        hover:shadow-lg cursor-pointer transition-all border-dashed"
+      <button
+        type="button"
+        className="group flex h-full min-h-[200px] w-full flex-col justify-between rounded-lg border border-dashed border-foreground/25 bg-card p-6 text-left transition-all duration-200 hover:border-primary hover:bg-accent/30"
         onClick={() => setOpenDialog(true)}
       >
-        <CardContent className="p-0 flex flex-col items-center justify-center h-40">
-          <div className="bg-primary/10 p-3 rounded-full mb-3">
-            <Plus className="text-primary h-6 w-6" />
-          </div>
-          <h2 className="text-lg font-medium text-center">Create New Interview</h2>
-          <p className="text-sm text-gray-500 mt-1">Set up custom interview questions</p>
-        </CardContent>
-      </Card>
+        <div className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background text-primary transition-colors group-hover:border-primary">
+          <Plus className="h-5 w-5" />
+        </div>
+        <div>
+          <p className="eyebrow">New</p>
+          <h2 className="font-display mt-1 text-2xl leading-tight text-foreground">
+            Create an interview
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Tailored to the exact role you&apos;re facing.
+          </p>
+        </div>
+      </button>
 
       <Dialog open={openDialog} onOpenChange={closeDialog}>
         <DialogContent className="max-w-2xl">
@@ -120,17 +125,13 @@ function AddNewInterview() {
             </DialogTitle>
             <DialogDescription>
               <div className="mt-2 mb-6">
-                <div className="flex justify-between mb-1">
-                  <div className="flex space-x-1">
-                    <div className={`w-3 h-3 rounded-full ${currentStep >= 1 ? 'bg-primary' : 'bg-gray-200'}`}></div>
-                    <div className={`w-3 h-3 rounded-full ${currentStep >= 2 ? 'bg-primary' : 'bg-gray-200'}`}></div>
-                    <div className={`w-3 h-3 rounded-full ${currentStep >= 3 ? 'bg-primary' : 'bg-gray-200'}`}></div>
-                  </div>
-                  <span className="text-xs text-gray-500">Step {currentStep} of 3</span>
+                <div className="flex justify-between mb-1.5">
+                  <span className="eyebrow">The position</span>
+                  <span className="nums text-xs text-muted-foreground">Step {currentStep} of 3</span>
                 </div>
-                <div className="w-full bg-gray-200 h-1 rounded-full">
-                  <div 
-                    className="bg-primary h-1 rounded-full transition-all" 
+                <div className="w-full bg-border h-1 rounded-full overflow-hidden">
+                  <div
+                    className="bg-primary h-1 rounded-full transition-all duration-300 ease-out"
                     style={{width: `${(currentStep / 3) * 100}%`}}
                   ></div>
                 </div>
@@ -178,7 +179,7 @@ function AddNewInterview() {
                       onChange={(e) => setJobDesc(e.target.value)}
                       className="mt-1 min-h-32"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       Separate different technologies with commas
                     </p>
                   </div>
@@ -207,7 +208,7 @@ function AddNewInterview() {
                         </Label>
                       </div>
                       <div className="px-1">
-                        <div className="flex justify-between text-xs text-gray-500 mb-1">
+                        <div className="flex justify-between text-xs text-muted-foreground mb-1">
                           <span>Entry level</span>
                           <span>Expert</span>
                         </div>
@@ -219,26 +220,26 @@ function AddNewInterview() {
                           value={[jobExperience]} 
                           onValueChange={(value) => setJobExperience(value[0])}
                         />
-                        <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <div className="flex justify-between text-xs text-muted-foreground mt-1">
                           <span>0 years</span>
                           <span>15+ years</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="bg-primary/5 p-4 rounded-lg">
+                    <div className="bg-secondary/50 border border-border p-4 rounded-lg">
                       <h4 className="text-sm font-medium mb-2">Interview Summary</h4>
                       <div className="space-y-2">
                         <div className="flex items-center">
-                          <  Briefcase size={16} className="text-gray-500 mr-2" />
+                          <  Briefcase size={16} className="text-muted-foreground mr-2" />
                           <span className="text-sm">{jobPosition}</span>
                         </div>
                         <div className="flex items-center">
-                          <FileSpreadsheet size={16} className="text-gray-500 mr-2" />
+                          <FileSpreadsheet size={16} className="text-muted-foreground mr-2" />
                           <span className="text-sm">{jobDesc.split(',').slice(0, 3).join(', ')}{jobDesc.split(',').length > 3 ? '...' : ''}</span>
                         </div>
                         <div className="flex items-center">
-                          <Clock size={16} className="text-gray-500 mr-2" />
+                          <Clock size={16} className="text-muted-foreground mr-2" />
                           <span className="text-sm">{jobExperience} years of experience</span>
                         </div>
                       </div>

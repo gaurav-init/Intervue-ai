@@ -5,7 +5,7 @@ import { useUser } from '@clerk/nextjs';
 import { desc, eq } from 'drizzle-orm';
 import React, { useEffect, useState } from 'react';
 import InterviewItemCard from './InterviewItemCard';
-import { SearchCheck, Briefcase } from 'lucide-react';
+import { Search, FileText } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -70,71 +70,93 @@ function InterviewList() {
     setFilteredList(filtered);
   };
 
+  const hasInterviews = !loading && filteredList.length > 0;
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between gap-4 items-center">
-        <h1 className="text-2xl font-bold">My Interview Sessions</h1>
-        <div className="flex gap-3 w-full md:w-auto">
-          <div className="relative flex-grow max-w-md">
-            <SearchCheck className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-            <Input 
-              placeholder="Search by position or tech..." 
-              className="pl-10 pr-4"
+    <div className="space-y-7">
+      <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
+        <div>
+          <p className="eyebrow">Your history</p>
+          <h2 className="font-display mt-2 text-3xl text-foreground">
+            Past sessions
+          </h2>
+        </div>
+        <div className="flex w-full gap-3 md:w-auto">
+          <div className="relative flex-grow md:w-72">
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+              size={17}
+            />
+            <Input
+              placeholder="Search position or stack…"
+              className="pl-10"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           <Select value={sortOrder} onValueChange={setSortOrder}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[170px] shrink-0">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="newest">Newest first</SelectItem>
               <SelectItem value="oldest">Oldest first</SelectItem>
-              <SelectItem value="experience-high">Highest experience</SelectItem>
-              <SelectItem value="experience-low">Lowest experience</SelectItem>
+              <SelectItem value="experience-high">Most experience</SelectItem>
+              <SelectItem value="experience-low">Least experience</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {!loading && filteredList.length > 0 ? (
-          filteredList.map((interview, index) => (
-            <InterviewItemCard 
-              interview={interview}
-              key={index} 
-            />
-          ))
-        ) : loading ? (
-          Array(3).fill(0).map((_, index) => (
-            <div key={index} className="rounded-lg border">
-              <div className="h-8 w-2/3 bg-gray-200 animate-pulse rounded m-4"></div>
-              <div className="h-4 w-1/2 bg-gray-200 animate-pulse rounded mx-4 mb-2"></div>
-              <div className="h-4 w-1/3 bg-gray-200 animate-pulse rounded mx-4 mb-4"></div>
-              <div className="flex gap-2 mx-4 mb-4">
-                {Array(3).fill(0).map((_, i) => (
-                  <div key={i} className="h-6 w-16 bg-gray-200 animate-pulse rounded"></div>
-                ))}
+
+      {hasInterviews ? (
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {filteredList.map((interview, index) => (
+            <InterviewItemCard interview={interview} key={index} />
+          ))}
+        </div>
+      ) : loading ? (
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {Array(3)
+            .fill(0)
+            .map((_, index) => (
+              <div
+                key={index}
+                className="rounded-lg border border-border bg-card p-5"
+              >
+                <div className="h-6 w-2/3 animate-pulse rounded bg-muted" />
+                <div className="mt-3 h-4 w-1/2 animate-pulse rounded bg-muted" />
+                <div className="mt-5 flex gap-2">
+                  {Array(3)
+                    .fill(0)
+                    .map((_, i) => (
+                      <div
+                        key={i}
+                        className="h-6 w-16 animate-pulse rounded-full bg-muted"
+                      />
+                    ))}
+                </div>
+                <div className="mt-5 flex gap-2 border-t border-border pt-4">
+                  <div className="h-8 flex-1 animate-pulse rounded bg-muted" />
+                  <div className="h-8 flex-1 animate-pulse rounded bg-muted" />
+                </div>
               </div>
-              <div className="flex justify-between border-t p-4">
-                <div className="h-8 w-24 bg-gray-200 animate-pulse rounded"></div>
-                <div className="h-8 w-24 bg-gray-200 animate-pulse rounded"></div>
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="col-span-full py-10 text-center">
-            <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-              <Briefcase size={36} className="text-gray-400" />
-            </div>
-            <h3 className="text-lg font-medium">No interviews found</h3>
-            <p className="text-gray-500 mt-1">
-              Try adjusting your search or create a new interview session.
-            </p>
+            ))}
+        </div>
+      ) : (
+        <div className="rounded-lg border border-dashed border-border bg-secondary/30 px-6 py-16 text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-border bg-card">
+            <FileText size={24} className="text-muted-foreground" />
           </div>
-        )}
-      </div>
+          <h3 className="font-display mt-5 text-xl text-foreground">
+            {searchQuery ? 'Nothing matches that search' : 'No sessions yet'}
+          </h3>
+          <p className="measure mx-auto mt-2 text-sm text-muted-foreground">
+            {searchQuery
+              ? 'Try a different position or technology, or clear the search to see everything.'
+              : 'Create your first interview above. Describe the role, answer on camera, and get coached on every answer.'}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

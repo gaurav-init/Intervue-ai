@@ -10,38 +10,27 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import {
-  AlertCircle,
-  Award,
   BookOpen,
   ChevronsUpDown,
   FileText,
   Home,
   LineChart,
   Lightbulb,
-  Moon,
-  PieChart,
-  Printer,
-  Star,
-  Sun,
-  ThumbsUp,
-  TrendingUp,
   Clock,
-  Video,
-  Calendar1Icon
+  TrendingUp,
 } from 'lucide-react'
 import { Progress } from "@/components/ui/progress"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Toaster } from 'react-hot-toast'
 import { Button } from '@/components/ui/button'
-import { Switch } from "@/components/ui/switch"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts'
-
-import { useTheme } from 'next-themes'
 import { GeneratePDFButton } from '@/app/dashboard/_components/GeneratePDFButton'
+
+const AMBER = '#c0601a'
+const EVERGREEN = '#2c6b54'
+const INK = '#3a332b'
+const GRID = '#e7e1d6'
 
 function Feedback() {
   const [feedbackList, setFeedbackList] = useState([]);
@@ -54,12 +43,9 @@ function Feedback() {
   const feedbackContentRef = useRef(null);
   const params = useParams();
   const interviewId = params.interviewId;
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
   const [chartData, setChartData] = useState([]);
 
   useEffect(() => {
-    setMounted(true);
     GetFeedback();
   }, []);
 
@@ -72,24 +58,21 @@ function Feedback() {
         .where(eq(UserAnswer.mockIdRef, interviewId))
         .orderBy(UserAnswer.id);
 
-      // Enhanced data with mock strengths and weaknesses
       const enhancedResult = result.map((item, index) => ({
         ...item,
         categoryStrength: ["Communication", "Technical Knowledge", "Problem Solving", "Experience"][Math.floor(Math.random() * 4)],
         categoryWeakness: ["Conciseness", "Specific Examples", "Structured Approach", "Technical Depth"][Math.floor(Math.random() * 4)],
-        timeToAnswer: Math.floor(Math.random() * 120) + 30, // Random time between 30-150 seconds
+        timeToAnswer: Math.floor(Math.random() * 120) + 30,
         questionNumber: index + 1
       }));
 
       setFeedbackList(enhancedResult);
 
-      // Calculate overall score based on ratings
       if (enhancedResult.length > 0) {
         const totalScore = enhancedResult.reduce((sum, item) => sum + item.rating, 0);
         setOverallScore(Math.round((totalScore / (enhancedResult.length * 10)) * 100));
       }
 
-      // Extract strengths and weaknesses
       const strengthsMap = new Map();
       const weaknessesMap = new Map();
 
@@ -108,20 +91,10 @@ function Feedback() {
       setStrengths(strengthsList);
       setWeaknesses(weaknessesList);
 
-      // Prepare chart data
       setChartData([
-        ...strengthsList.map(item => ({
-          name: item.category,
-          value: item.count,
-          type: 'Strength'
-        })),
-        ...weaknessesList.map(item => ({
-          name: item.category,
-          value: item.count,
-          type: 'Weakness'
-        }))
+        ...strengthsList.map(item => ({ name: item.category, value: item.count, type: 'Strength' })),
+        ...weaknessesList.map(item => ({ name: item.category, value: item.count, type: 'Weakness' }))
       ]);
-
     } catch (error) {
       console.error("Error fetching feedback:", error);
     } finally {
@@ -129,459 +102,322 @@ function Feedback() {
     }
   }
 
-  const getScoreColor = (score) => {
-    if (score >= 80) return "text-green-600 dark:text-green-400";
-    if (score >= 60) return "text-yellow-600 dark:text-yellow-400";
-    return "text-red-600 dark:text-red-400";
+  const scoreColor = (score) => {
+    if (score >= 80) return "text-chart-2";
+    if (score >= 60) return "text-primary";
+    return "text-destructive";
+  }
+
+  const scoreLabel = (score) => {
+    if (score >= 80) return "Excellent";
+    if (score >= 70) return "Good";
+    if (score >= 60) return "Satisfactory";
+    if (score >= 50) return "Needs work";
+    return "Keep practicing";
   }
 
   const getScoreBadge = (rating) => {
-    const percentage = (rating / 10) * 100;
-    if (percentage >= 80) return <Badge className="bg-green-500 dark:bg-green-600">Excellent</Badge>;
-    if (percentage >= 70) return <Badge className="bg-green-400 dark:bg-green-500">Good</Badge>;
-    if (percentage >= 60) return <Badge className="bg-yellow-500 dark:bg-yellow-600">Satisfactory</Badge>;
-    if (percentage >= 50) return <Badge className="bg-orange-500 dark:bg-orange-600">Needs Improvement</Badge>;
-    return <Badge className="bg-red-500 dark:bg-red-600">Poor</Badge>;
+    const pct = (rating / 10) * 100;
+    if (pct >= 80) return <Badge className="bg-chart-2 text-white">Excellent</Badge>;
+    if (pct >= 70) return <Badge className="bg-chart-2/80 text-white">Good</Badge>;
+    if (pct >= 60) return <Badge className="bg-primary text-primary-foreground">Satisfactory</Badge>;
+    if (pct >= 50) return <Badge variant="outline" className="text-foreground">Needs work</Badge>;
+    return <Badge className="bg-destructive text-destructive-foreground">Keep practicing</Badge>;
   }
 
-  const getFormattedDate = () => {
-    const date = new Date();
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
+  const getFormattedDate = () => new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
       </div>
     );
   }
 
+  const recommendationCopy = {
+    Conciseness: "Practice delivering answers more concisely while keeping essential details. Use the STAR method, but keep each section brief and impactful.",
+    "Specific Examples": "Prepare concrete examples from past experience. Use metrics and quantifiable outcomes to demonstrate your impact.",
+    "Structured Approach": "Use frameworks like STAR (Situation, Task, Action, Result) so interviewers can follow your thinking and you cover every part.",
+    "Technical Depth": "Review key concepts and practice explaining them in detail — break complex ideas into simple terms to show real understanding.",
+  };
+
   return (
-    <div className='p-4 md:p-10 max-w-7xl mx-auto'>
+    <div className="mx-auto max-w-7xl px-5 py-12 md:px-10 md:py-16">
       <Toaster />
 
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Interview Feedback</h1>
-       
-      </div>
-
       {feedbackList?.length === 0 ? (
-        <Card>
-          <CardHeader>
-            <CardTitle className='text-xl text-gray-700 dark:text-gray-200'>No Interview Feedback Available</CardTitle>
-            <CardDescription>Your interview feedback will appear here once it's been processed.</CardDescription>
-          </CardHeader>
-          <CardFooter>
-            <Button onClick={() => router.replace('/dashboard')} className="flex items-center gap-2">
-              <Home className="h-4 w-4" /> Return to Dashboard
-            </Button>
-          </CardFooter>
-        </Card>
+        <div className="rounded-lg border border-dashed border-border bg-secondary/30 px-6 py-20 text-center">
+          <h1 className="font-display text-2xl text-foreground">No feedback yet</h1>
+          <p className="measure mx-auto mt-2 text-muted-foreground">
+            Your feedback appears here once you&apos;ve answered and saved at least one question.
+          </p>
+          <Button onClick={() => router.replace('/dashboard')} className="mt-6">
+            <Home className="h-4 w-4" /> Back to dashboard
+          </Button>
+        </div>
       ) : (
         <>
-        <div  ref={feedbackContentRef} >
-          {/* Congratulations Banner with Animation */}
-          <div  className="text-center space-y-2 mb-6 p-8 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg animate-fade-in">
-            <div className="inline-flex items-center justify-center p-3 bg-green-100 dark:bg-green-800/50 rounded-full mb-3 animate-bounce-slow">
-              <Award className="h-10 w-10 text-green-600 dark:text-green-400" />
+          <div ref={feedbackContentRef}>
+            {/* Masthead */}
+            <div className="border-b border-border pb-8">
+              <p className="eyebrow">Session complete</p>
+              <h1 className="font-display text-display mt-3 text-foreground">
+                Here&apos;s how it went.
+              </h1>
+              <p className="measure mt-3 text-lg text-muted-foreground">
+                An honest read on your answers — what landed, what to tighten, and
+                exactly where to aim next time.
+              </p>
             </div>
-            <h1 className='text-3xl font-bold text-green-600 dark:text-green-400'>Congratulations!</h1>
-            <p className='text-gray-600 dark:text-gray-300'>You've completed your interview. Here's your personalized feedback.</p>
-          </div>
 
-          {/* Tabs for organizing content */}
-          <Tabs defaultValue="summary" value={activeTab} onValueChange={setActiveTab} className="mb-8">
-            <TabsList className="grid grid-cols-4 mb-6">
-              <TabsTrigger value="summary" className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                <span className="hidden sm:inline">Summary</span>
-              </TabsTrigger>
-              <TabsTrigger value="analytics" className="flex items-center gap-2">
-                <LineChart className="h-4 w-4" />
-                <span className="hidden sm:inline">Analytics</span>
-              </TabsTrigger>
-              <TabsTrigger value="answers" className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4" />
-                <span className="hidden sm:inline">Answers</span>
-              </TabsTrigger>
-              <TabsTrigger value="recommendations" className="flex items-center gap-2">
-                <Lightbulb className="h-4 w-4" />
-                <span className="hidden sm:inline">Recommendations</span>
-              </TabsTrigger>
-            </TabsList>
+            {/* PDF-only header */}
+            <div className="hidden print:block border-b pb-4 my-6">
+              <h2 className="text-2xl font-bold">Interview Feedback Report</h2>
+              <p className="text-muted-foreground">Generated {getFormattedDate()} · {feedbackList.length} questions</p>
+            </div>
 
-            {/* Summary Tab Content */}
-            <TabsContent value="summary" className="space-y-6">
-              <div >
-                {/* PDF Header (only visible in PDF) */}
-                <div className="hidden print:block flex justify-between items-center border-b pb-4 mb-6">
-                  <div>
-                    <h1 className="text-2xl font-bold">Interview Feedback Report</h1>
-                    <p className="text-gray-500">Generated on: {getFormattedDate()}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium">Interview ID: {params.interviewId}</p>
-                    <p className="text-gray-500">Questions: {feedbackList.length}</p>
-                  </div>
-                </div>
+            <Tabs defaultValue="summary" value={activeTab} onValueChange={setActiveTab} className="mt-8">
+              <TabsList className="mb-8 grid grid-cols-4">
+                <TabsTrigger value="summary" className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" /><span className="hidden sm:inline">Summary</span>
+                </TabsTrigger>
+                <TabsTrigger value="analytics" className="flex items-center gap-2">
+                  <LineChart className="h-4 w-4" /><span className="hidden sm:inline">Analytics</span>
+                </TabsTrigger>
+                <TabsTrigger value="answers" className="flex items-center gap-2">
+                  <BookOpen className="h-4 w-4" /><span className="hidden sm:inline">Answers</span>
+                </TabsTrigger>
+                <TabsTrigger value="recommendations" className="flex items-center gap-2">
+                  <Lightbulb className="h-4 w-4" /><span className="hidden sm:inline">Next steps</span>
+                </TabsTrigger>
+              </TabsList>
 
-                {/* Overall Score Card */}
-                <Card className="border-2 border-primary/20 overflow-hidden">
-                  <div className="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-primary/5 to-transparent"></div>
-                  <CardHeader>
-                    <CardTitle className="flex justify-between  items-center">
-                      <span>Overall Performance</span>
-                      <div className="flex flex-col items-end">
-                        <span className={`text-4xl font-bold ${getScoreColor(overallScore)}`}>{overallScore}%</span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                          {overallScore >= 80 ? "Excellent" :
-                            overallScore >= 70 ? "Good" :
-                              overallScore >= 60 ? "Satisfactory" :
-                                overallScore >= 50 ? "Needs Improvement" : "Poor"}
+              {/* SUMMARY */}
+              <TabsContent value="summary" className="space-y-8">
+                {/* Overall score */}
+                <div className="rounded-lg border border-border bg-card p-6 md:p-8">
+                  <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+                    <div>
+                      <span className="eyebrow">Overall performance</span>
+                      <div className="mt-3 flex items-baseline gap-3">
+                        <span className={`nums font-display text-6xl ${scoreColor(overallScore)}`}>
+                          {overallScore}%
+                        </span>
+                        <span className="text-sm font-semibold text-muted-foreground">
+                          {scoreLabel(overallScore)}
                         </span>
                       </div>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <Progress value={overallScore} className="h-3" />
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Alert variant="default" className="bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800">
-                        <ThumbsUp className="h-4 w-4 text-green-600 dark:text-green-400" />
-                        <AlertTitle>Key Strengths</AlertTitle>
-                        <AlertDescription>
-                          <ul className="list-disc pl-5 mt-2 space-y-1">
-                            {strengths.slice(0, 3).map((item, idx) => (
-                              <li key={idx} className="text-sm">{item.category}</li>
-                            ))}
-                          </ul>
-                        </AlertDescription>
-                      </Alert>
-
-                      <Alert variant="default" className="bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800">
-                        <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                        <AlertTitle>Areas for Improvement</AlertTitle>
-                        <AlertDescription>
-                          <ul className="list-disc pl-5 mt-2 space-y-1">
-                            {weaknesses.slice(0, 3).map((item, idx) => (
-                              <li key={idx} className="text-sm">{item.category}</li>
-                            ))}
-                          </ul>
-                        </AlertDescription>
-                      </Alert>
                     </div>
-                  </CardContent>
-                </Card>
+                    <div className="w-full md:max-w-xs">
+                      <Progress value={overallScore} className="h-2.5" />
+                    </div>
+                  </div>
 
-                {/* Analytics Summary */}
-                <div className="grid grid-cols-1 md:grid-cols-3 mt-4 gap-4">
-                  <Card className="group hover:border-primary/40 transition-all">
-                    <CardHeader className="pb-2 bg-gradient-to-r from-transparent to-primary/5 group-hover:to-primary/10 transition-all">
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <TrendingUp className="h-4 w-4 text-primary" /> Performance
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-3xl font-bold text-primary">{overallScore}%</div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Overall interview score</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="group hover:border-primary/40 transition-all">
-                    <CardHeader className="pb-2 bg-gradient-to-r from-transparent to-primary/5 group-hover:to-primary/10 transition-all">
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-primary" /> Questions
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-3xl font-bold text-primary">{feedbackList.length}</div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Total questions answered</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="group hover:border-primary/40 transition-all">
-                    <CardHeader className="pb-2 bg-gradient-to-r from-transparent to-primary/5 group-hover:to-primary/10 transition-all">
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-primary" /> Avg. Response Time
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-3xl font-bold text-primary">
-                        {Math.round(feedbackList.reduce((sum, item) => sum + (item.timeToAnswer || 0), 0) / feedbackList.length)}s
-                      </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Average time per question</p>
-                    </CardContent>
-                  </Card>
+                  <div className="mt-8 grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-border bg-border md:grid-cols-2">
+                    <div className="bg-card p-5">
+                      <span className="eyebrow">What worked</span>
+                      <ul className="mt-3 space-y-1.5">
+                        {strengths.slice(0, 3).map((item, idx) => (
+                          <li key={idx} className="flex items-center gap-2 text-sm text-foreground">
+                            <span className="h-1.5 w-1.5 rounded-full bg-chart-2" />
+                            {item.category}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="bg-card p-5">
+                      <span className="eyebrow">Where to aim</span>
+                      <ul className="mt-3 space-y-1.5">
+                        {weaknesses.slice(0, 3).map((item, idx) => (
+                          <li key={idx} className="flex items-center gap-2 text-sm text-foreground">
+                            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                            {item.category}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </TabsContent>
 
-            {/* Analytics Tab Content */}
-            <TabsContent value="analytics" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <PieChart className="h-5 w-5 text-primary" />
-                    Skills Analysis
-                  </CardTitle>
-                  <CardDescription>Breakdown of your strengths and areas for improvement</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-72">
+                {/* Quick stats */}
+                <div className="grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-border bg-border md:grid-cols-3">
+                  {[
+                    { icon: TrendingUp, label: 'Overall score', value: `${overallScore}%`, note: 'Across all answers' },
+                    { icon: FileText, label: 'Questions', value: feedbackList.length, note: 'Answered this session' },
+                    { icon: Clock, label: 'Avg. response', value: `${Math.round(feedbackList.reduce((s, i) => s + (i.timeToAnswer || 0), 0) / feedbackList.length)}s`, note: 'Time per question' },
+                  ].map((s) => (
+                    <div key={s.label} className="bg-card p-6">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <s.icon className="h-4 w-4 text-primary" />
+                        <span className="eyebrow">{s.label}</span>
+                      </div>
+                      <div className="nums font-display mt-3 text-4xl text-foreground">{s.value}</div>
+                      <p className="mt-1 text-xs text-muted-foreground">{s.note}</p>
+                    </div>
+                  ))}
+                </div>
+              </TabsContent>
+
+              {/* ANALYTICS */}
+              <TabsContent value="analytics" className="space-y-6">
+                <div className="rounded-lg border border-border bg-card p-6">
+                  <span className="eyebrow">Skills breakdown</span>
+                  <h3 className="font-display mt-2 text-xl text-foreground">Strengths and gaps</h3>
+                  <div className="mt-6 h-72">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={chartData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis allowDecimals={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke={GRID} vertical={false} />
+                        <XAxis dataKey="name" tick={{ fill: INK, fontSize: 12 }} stroke={GRID} />
+                        <YAxis allowDecimals={false} tick={{ fill: INK, fontSize: 12 }} stroke={GRID} />
                         <RechartsTooltip
-                          formatter={(value, name, props) => [
-                            `${value} ${value === 1 ? 'question' : 'questions'}`,
-                            props.payload.type
-                          ]}
+                          cursor={{ fill: 'rgba(192,96,26,0.06)' }}
+                          formatter={(value, name, props) => [`${value} ${value === 1 ? 'question' : 'questions'}`, props.payload.type]}
                         />
-                        <Bar
-                          dataKey="value"
-                          fill={theme === 'dark' ? '#8884d8' : '#4f46e5'}
-                          name="Count"
-                          radius={[4, 4, 0, 0]}
-                        />
+                        <Bar dataKey="value" name="Count" radius={[3, 3, 0, 0]}
+                          fill={AMBER} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Performance by Question</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-64">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div className="rounded-lg border border-border bg-card p-6">
+                    <span className="eyebrow">Score by question</span>
+                    <div className="mt-6 h-64">
                       <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={feedbackList.map(item => ({
-                          name: item.questionNumber,
-                          score: item.rating
-                        }))}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" label={{ value: 'Question #', position: 'insideBottom', offset: -5 }} />
-                          <YAxis domain={[0, 10]} label={{ value: 'Score', angle: -90, position: 'insideLeft' }} />
-                          <RechartsTooltip formatter={(value) => [`${value}/10`, 'Score']} />
-                          <Bar
-                            dataKey="score"
-                            fill={theme === 'dark' ? '#22c55e' : '#10b981'}
-                            name="Score"
-                            radius={[4, 4, 0, 0]}
-                          />
+                        <BarChart data={feedbackList.map(i => ({ name: i.questionNumber, score: i.rating }))}>
+                          <CartesianGrid strokeDasharray="3 3" stroke={GRID} vertical={false} />
+                          <XAxis dataKey="name" tick={{ fill: INK, fontSize: 12 }} stroke={GRID} />
+                          <YAxis domain={[0, 10]} tick={{ fill: INK, fontSize: 12 }} stroke={GRID} />
+                          <RechartsTooltip cursor={{ fill: 'rgba(44,107,84,0.06)' }} formatter={(v) => [`${v}/10`, 'Score']} />
+                          <Bar dataKey="score" name="Score" radius={[3, 3, 0, 0]} fill={EVERGREEN} />
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Response Time by Question</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-64">
+                  <div className="rounded-lg border border-border bg-card p-6">
+                    <span className="eyebrow">Response time</span>
+                    <div className="mt-6 h-64">
                       <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={feedbackList.map(item => ({
-                          name: item.questionNumber,
-                          time: item.timeToAnswer
-                        }))}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" label={{ value: 'Question #', position: 'insideBottom', offset: -5 }} />
-                          <YAxis label={{ value: 'Seconds', angle: -90, position: 'insideLeft' }} />
-                          <RechartsTooltip formatter={(value) => [`${value} seconds`, 'Time']} />
-                          <Bar
-                            dataKey="time"
-                            fill={theme === 'dark' ? '#3b82f6' : '#2563eb'}
-                            name="Time"
-                            radius={[4, 4, 0, 0]}
-                          />
+                        <BarChart data={feedbackList.map(i => ({ name: i.questionNumber, time: i.timeToAnswer }))}>
+                          <CartesianGrid strokeDasharray="3 3" stroke={GRID} vertical={false} />
+                          <XAxis dataKey="name" tick={{ fill: INK, fontSize: 12 }} stroke={GRID} />
+                          <YAxis tick={{ fill: INK, fontSize: 12 }} stroke={GRID} />
+                          <RechartsTooltip cursor={{ fill: 'rgba(58,51,43,0.06)' }} formatter={(v) => [`${v}s`, 'Time']} />
+                          <Bar dataKey="time" name="Time" radius={[3, 3, 0, 0]} fill={INK} />
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
+                  </div>
+                </div>
+              </TabsContent>
 
-            {/* Answers Tab Content */}
-            <TabsContent value="answers" className="space-y-4">
-              <h2 className='text-lg font-medium mb-4 flex items-center gap-2'>
-                <BookOpen className="h-5 w-5 text-primary" /> Detailed Question Feedback
-              </h2>
-              {feedbackList.map((item, index) => (
-                <Collapsible key={index} className='mb-4 border rounded-lg overflow-hidden dark:border-gray-700 hover:border-primary/40 dark:hover:border-primary/40 transition-all' defaultOpen={index === 0}>
-                  <CollapsibleTrigger className='p-4 flex justify-between items-center w-full hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors text-left'>
-                    <div className="flex items-center gap-3">
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-medium text-primary">
-                        {index + 1}
-                      </span>
-                      <div className="flex-1">
-                        <h3 className="font-medium truncate max-w-md">{item.question}</h3>
-                        <div className="flex items-center gap-2 mt-1">
-                          {getScoreBadge(item.rating)}
-                          <span className="text-xs text-gray-500 dark:text-gray-400">Rating: {item.rating}/10</span>
+              {/* ANSWERS */}
+              <TabsContent value="answers" className="space-y-4">
+                <div className="mb-2">
+                  <span className="eyebrow">Question by question</span>
+                  <h3 className="font-display mt-2 text-xl text-foreground">Every answer, reviewed</h3>
+                </div>
+                {feedbackList.map((item, index) => (
+                  <Collapsible key={index} className="overflow-hidden rounded-lg border border-border bg-card transition-colors hover:border-foreground/20" defaultOpen={index === 0}>
+                    <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 p-4 text-left transition-colors hover:bg-accent/30">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <span className="nums flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border text-sm font-bold text-foreground">
+                          {index + 1}
+                        </span>
+                        <div className="min-w-0">
+                          <h4 className="truncate font-semibold text-foreground">{item.question}</h4>
+                          <div className="mt-1 flex items-center gap-2">
+                            {getScoreBadge(item.rating)}
+                            <span className="nums text-xs text-muted-foreground">{item.rating}/10</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <ChevronsUpDown className='h-5 w-5 text-gray-500 dark:text-gray-400' />
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="border-t dark:border-gray-700">
-                    <div className='grid gap-4 p-4'>
-                      <div className='p-3 rounded-lg bg-blue-50 border border-blue-100 dark:bg-blue-900/20 dark:border-blue-800'>
-                        <h4 className='font-semibold text-blue-800 dark:text-blue-300 mb-1'>Your Answer</h4>
-                        <p className='text-sm text-blue-900 dark:text-blue-200'>{item.userAns}</p>
-                      </div>
-
-                      <div className='p-3 rounded-lg bg-green-50 border border-green-100 dark:bg-green-900/20 dark:border-green-800'>
-                        <h4 className='font-semibold text-green-800 dark:text-green-300 mb-1'>Model Answer</h4>
-                        <p className='text-sm text-green-900 dark:text-green-200'>{item.correctAns}</p>
-                      </div>
-
-                      <div className='p-3 rounded-lg bg-purple-50 border border-purple-100 dark:bg-purple-900/20 dark:border-purple-800'>
-                        <h4 className='font-semibold text-purple-800 dark:text-purple-300 mb-1'>Personalized Feedback</h4>
-                        <p className='text-sm text-purple-900 dark:text-purple-200'>{item.feedback}</p>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
-                        <div className="p-3 rounded-lg bg-amber-50 border border-amber-100 dark:bg-amber-900/20 dark:border-amber-800">
-                          <h4 className="font-semibold text-amber-800 dark:text-amber-300 mb-1">Area for Improvement</h4>
-                          <p className="text-sm text-amber-900 dark:text-amber-200">{item.categoryWeakness}</p>
+                      <ChevronsUpDown className="h-5 w-5 shrink-0 text-muted-foreground" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="border-t border-border">
+                      <div className="divide-y divide-border">
+                        <div className="p-4">
+                          <span className="eyebrow">Your answer</span>
+                          <p className="mt-2 text-sm leading-relaxed text-foreground">{item.userAns}</p>
                         </div>
-                        <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-800">
-                          <h4 className="font-semibold text-emerald-800 dark:text-emerald-300 mb-1">Strength Demonstrated</h4>
-                          <p className="text-sm text-emerald-900 dark:text-emerald-200">{item.categoryStrength}</p>
+                        <div className="p-4">
+                          <span className="eyebrow">A strong answer</span>
+                          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.correctAns}</p>
+                        </div>
+                        <div className="bg-secondary/40 p-4">
+                          <span className="eyebrow">Coach&apos;s note</span>
+                          <p className="mt-2 text-sm leading-relaxed text-foreground">{item.feedback}</p>
                         </div>
                       </div>
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
-              ))}
-            </TabsContent>
+                    </CollapsibleContent>
+                  </Collapsible>
+                ))}
+              </TabsContent>
 
-            {/* Recommendations Tab Content */}
-            <TabsContent  value="recommendations" className="space-y-6">
-              <Card className="bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
-                <CardHeader>
-                  <CardTitle className="text-blue-800 dark:text-blue-300 flex items-center gap-2">
-                    <Lightbulb className="h-5 w-5" /> Key Recommendations
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul  className="space-y-4">
-                    {weaknesses.slice(0, 3).map((weakness, idx) => (
-                      <li key={idx} className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
-                        <h3 className="text-blue-800 dark:text-blue-300 font-medium mb-2">
-                          Improve {weakness.category}
-                        </h3>
-                        <p className="text-gray-700 dark:text-gray-300 text-sm">
-                          {weakness.category === "Conciseness" && "Practice delivering your answers more concisely while maintaining essential details. Try the STAR method but focus on keeping each section brief and impactful."}
-                          {weakness.category === "Specific Examples" && "Prepare more concrete examples from your past experience to illustrate your skills. Use metrics and quantifiable outcomes whenever possible to demonstrate your impact."}
-                          {weakness.category === "Structured Approach" && "Use frameworks like STAR (Situation, Task, Action, Result) to structure your answers. This helps interviewers follow your thought process and ensures you cover all important aspects."}
-                          {weakness.category === "Technical Depth" && "Review technical concepts and be prepared to explain them in more detail. Practice breaking down complex concepts into simpler terms and demonstrating your understanding beyond surface level."}
-                        </p>
-                        <div className="mt-3 text-sm text-blue-600 dark:text-blue-400 font-medium">
-                          Practice Exercise:
-                          <span className="text-gray-600 dark:text-gray-400 font-normal ml-1">
-                            {weakness.category === "Conciseness" && "Take a previous long answer and challenge yourself to convey the same information in half the time."}
-                            {weakness.category === "Specific Examples" && "For each skill on your resume, prepare at least two STAR stories with specific metrics and outcomes."}
-                            {weakness.category === "Structured Approach" && "Record yourself answering common interview questions and review if your answers follow a clear, logical structure."}
-                            {weakness.category === "Technical Depth" && "For each technical skill you claim, prepare explanations at three levels: beginner, intermediate, and expert."}
-                          </span>
+              {/* NEXT STEPS */}
+              <TabsContent value="recommendations" className="space-y-8">
+                <div>
+                  <span className="eyebrow">Before your next session</span>
+                  <h3 className="font-display mt-2 text-xl text-foreground">Three things to practice</h3>
+                  <ol className="mt-6 divide-y divide-border border-t border-border">
+                    {weaknesses.slice(0, 3).map((w, idx) => (
+                      <li key={idx} className="flex gap-5 py-6">
+                        <span className="nums font-display text-2xl text-primary/80">
+                          {String(idx + 1).padStart(2, '0')}
+                        </span>
+                        <div>
+                          <h4 className="font-semibold text-foreground">Improve {w.category}</h4>
+                          <p className="measure mt-2 text-sm leading-relaxed text-muted-foreground">
+                            {recommendationCopy[w.category]}
+                          </p>
                         </div>
                       </li>
                     ))}
-                  </ul>
-                </CardContent>
-              </Card>
-              {/* Suggested Learning Resources Card - NEW SECTION */}
-              <Card className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                <CardHeader>
-                  <CardTitle className="text-gray-800 dark:text-gray-100">Suggested Learning Resources</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="border rounded-lg p-4 hover:border-primary/40 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all cursor-pointer">
-                      <div className="flex items-start gap-3">
-                        <BookOpen className="h-5 w-5 text-primary mt-1" />
-                        <div>
-                          <h3 className="font-medium dark:text-gray-100">Interview Preparation Guide</h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                            Comprehensive strategies to improve your interview performance with practical examples.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                  </ol>
+                </div>
 
-                    <div className="border rounded-lg p-4 hover:border-primary/40 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all cursor-pointer">
-                      <div className="flex items-start gap-3">
-                        <Video className="h-5 w-5 text-primary mt-1" />
-                        <div>
-                          <h3 className="font-medium dark:text-gray-100">Mock Interview Videos</h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                            Watch expert-led interview examples with commentary on effective techniques.
-                          </p>
+                <div className="rounded-lg border border-border bg-secondary/40 p-6">
+                  <span className="eyebrow">Keep going</span>
+                  <h3 className="font-display mt-2 text-xl text-foreground">Resources that help</h3>
+                  <div className="mt-5 grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-border bg-border md:grid-cols-2">
+                    {[
+                      { icon: BookOpen, title: 'Interview prep guide', body: 'Practical strategies with worked examples.' },
+                      { icon: FileText, title: 'Answer templates', body: 'STAR frameworks for common questions.' },
+                      { icon: LineChart, title: 'Mock interview library', body: 'Expert-led examples with commentary.' },
+                      { icon: Clock, title: 'Schedule practice', body: 'Book focused sessions with feedback.' },
+                    ].map((r) => (
+                      <div key={r.title} className="bg-card p-5">
+                        <div className="flex items-start gap-3">
+                          <r.icon className="mt-0.5 h-5 w-5 text-primary" />
+                          <div>
+                            <h4 className="font-semibold text-foreground">{r.title}</h4>
+                            <p className="mt-1 text-sm text-muted-foreground">{r.body}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-
-                    <div className="border rounded-lg p-4 hover:border-primary/40 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all cursor-pointer">
-                      <div className="flex items-start gap-3">
-                        <FileText className="h-5 w-5 text-primary mt-1" />
-                        <div>
-                          <h3 className="font-medium dark:text-gray-100">Answer Templates</h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                            Structured frameworks for common interview questions across different industries.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="border rounded-lg p-4 hover:border-primary/40 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all cursor-pointer">
-                      <div className="flex items-start gap-3">
-                        <Calendar1Icon className="h-5 w-5 text-primary mt-1" />
-                        <div>
-                          <h3 className="font-medium dark:text-gray-100">Practice Sessions</h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                            Schedule one-on-one practice interviews with feedback from experienced coaches.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                    ))}
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
 
-
-            
-
-          
-             
-
-              </TabsContent> </Tabs>
-                  {/* Action Buttons - Only visible in UI (not in PDF) */}
-            
-
-              </div>      <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-            <Button onClick={() => router.replace('/dashboard')} className="flex items-center gap-2">
-              <Home className="h-4 w-4" /> Return to Dashboard
+          <div className="mt-12 flex flex-col gap-3 border-t border-border pt-6 sm:flex-row sm:justify-end">
+            <Button variant="outline" onClick={() => router.replace('/dashboard')}>
+              <Home className="h-4 w-4" /> Back to dashboard
             </Button>
             <GeneratePDFButton
-              contentRef={feedbackContentRef} 
-              fileName={`interview-feedback-${params.interviewId}.pdf`} 
+              contentRef={feedbackContentRef}
+              fileName={`interview-feedback-${params.interviewId}.pdf`}
             />
-          </div></>)}
-              </div>
-      )
-    }
-    export default Feedback
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
 
-
+export default Feedback

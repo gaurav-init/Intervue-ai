@@ -1,11 +1,10 @@
-'use client'
+'use client';
 import React from 'react';
-import { UserButton } from '@clerk/nextjs';
-import Image from 'next/image';
+import { UserButton, SignedIn, SignedOut } from '@clerk/nextjs';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ModeToggle } from './ModeToggle'
 import { Menu } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Sheet,
   SheetContent,
@@ -14,77 +13,97 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 
+const navItems = [
+  { label: 'Dashboard', href: '/dashboard' },
+  { label: 'Features', href: '/dashboard/features' },
+  { label: 'Pricing', href: '/dashboard/upgrade' },
+  { label: 'About', href: '/dashboard/about' },
+  { label: 'Contact', href: '/dashboard/contacts' },
+];
+
 const Header = () => {
   const path = usePathname();
 
-  const navItems = [
-    { label: "Home", href: "/dashboard" },
-    { label: "Features", href: "/dashboard/features" },
-    { label: "Pricing", href: "/dashboard/upgrade" },
-    { label: "About Us", href: "/dashboard/about" },
-    { label: "Contact", href: "/dashboard/contacts" },
-  ];
-
-  const NavLink = ({ href, label }) => (
-    <Link href={href}>
-      <li className={`
-        hover:text-primary hover:font-bold
-        transition-all cursor-pointer
-        ${path === href ? 'text-primary font-bold' : ''}
-        hover:scale-105
-      `}>
-        {label}
-      </li>
-    </Link>
-  );
+  const NavLink = ({ href, label, onClick }) => {
+    const active = path === href;
+    return (
+      <Link
+        href={href}
+        onClick={onClick}
+        className="group relative py-1 text-sm font-medium text-foreground/70 transition-colors hover:text-foreground"
+      >
+        <span className={active ? 'text-foreground' : ''}>{label}</span>
+        <span
+          className={`absolute -bottom-0.5 left-0 h-px bg-primary transition-all duration-300 ${
+            active ? 'w-full' : 'w-0 group-hover:w-full'
+          }`}
+        />
+      </Link>
+    );
+  };
 
   return (
-    <div className="sticky top-0 z-50 w-full">
-      <div className="flex p-4 items-center justify-between bg-secondary/80 backdrop-blur-sm shadow-md">
-        {/* Logo and Brand */}
-        <div className="flex items-center gap-4">
-          <Image
-            src="/logo.svg"
-            width={30}
-            height={30}
-            alt="logo"
-            className="hover:opacity-80 transition-opacity"
-          />
-          <h1 className="text-xl font-bold  sm:block">Intervue AI</h1>
-        </div>
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/85 backdrop-blur-md">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-5 py-4 md:px-10">
+        <Link href="/" className="flex items-baseline gap-2">
+          <span className="font-display text-2xl leading-none tracking-tight text-foreground">
+            Intervue
+          </span>
+          <span className="text-sm font-bold uppercase tracking-[0.2em] text-primary">
+            AI
+          </span>
+        </Link>
 
-        {/* Desktop Navigation */}
-        <ul className="hidden lg:flex gap-8">
+        <nav className="hidden items-center gap-8 lg:flex">
           {navItems.map((item) => (
             <NavLink key={item.href} {...item} />
           ))}
-        
-        </ul>
+        </nav>
 
-        {/* Actions Group */}
-        <div className="flex items-center gap-4">
-          <ModeToggle />
-          <UserButton afterSignOutUrl="/" />
-          
-          {/* Mobile Menu */}
+        <div className="flex items-center gap-3">
+          <SignedOut>
+            <Link href="/sign-in" className="hidden sm:block">
+              <Button variant="ghost" size="sm">
+                Sign in
+              </Button>
+            </Link>
+            <Link href="/sign-up" className="hidden sm:block">
+              <Button size="sm">Start practicing</Button>
+            </Link>
+          </SignedOut>
+          <SignedIn>
+            <UserButton afterSignOutUrl="/" />
+          </SignedIn>
+
           <Sheet>
-            <SheetTrigger className="lg:hidden">
+            <SheetTrigger className="lg:hidden" aria-label="Open menu">
               <Menu className="h-6 w-6" />
             </SheetTrigger>
-            <SheetContent>
+            <SheetContent className="bg-background">
               <SheetHeader>
-                <SheetTitle>Menu</SheetTitle>
+                <SheetTitle className="font-display text-2xl">Menu</SheetTitle>
               </SheetHeader>
-              <ul className="flex flex-col gap-4 mt-8">
+              <nav className="mt-10 flex flex-col gap-5">
                 {navItems.map((item) => (
                   <NavLink key={item.href} {...item} />
                 ))}
-              </ul>
+                <div className="rule my-2" />
+                <SignedOut>
+                  <Link href="/sign-in">
+                    <Button variant="outline" className="w-full">
+                      Sign in
+                    </Button>
+                  </Link>
+                  <Link href="/sign-up">
+                    <Button className="w-full">Start practicing</Button>
+                  </Link>
+                </SignedOut>
+              </nav>
             </SheetContent>
           </Sheet>
         </div>
       </div>
-    </div>
+    </header>
   );
 };
 

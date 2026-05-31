@@ -1,122 +1,92 @@
-'use client'
-import { UserButton } from '@clerk/nextjs';
+'use client';
 import React from 'react';
-import { MoonIcon, SunIcon, LayoutDashboardIcon, ClockIcon, CalendarIcon, BarChart3Icon } from 'lucide-react';
+import { useUser } from '@clerk/nextjs';
+import { CalendarDays, Zap, ArrowRight } from 'lucide-react';
 import AddNewInterview from './_components/AddNewInterview';
 import InterviewList from './_components/InterviewList';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useTheme } from 'next-themes';
-import {Link} from 'next/link';
 import { useRouter } from 'next/navigation';
+
+const stats = [
+  { value: '12', label: 'Total interviews', note: 'This month' },
+  { value: '78%', label: 'Average score', note: 'Last 5 sessions' },
+  { value: '3', label: 'Upcoming', note: 'Scheduled' },
+  { value: '7.5h', label: 'Practice time', note: 'This month' },
+];
+
 function Dashboard() {
-  const { setTheme, theme } = useTheme();
-const router = useRouter();
-  
-  // Sample stats for the dashboard
-  const stats = [
-    {
-      title: "Total Interviews",
-      value: "12",
-      icon: <LayoutDashboardIcon className="h-4 w-4 text-muted-foreground" />,
-      description: "This month"
-    },
-    {
-      title: "Average Score",
-      value: "78%",
-      icon: <BarChart3Icon className="h-4 w-4 text-muted-foreground" />,
-      description: "Last 5 interviews"
-    },
-    {
-      title: "Upcoming",
-      value: "3",
-      icon: <CalendarIcon className="h-4 w-4 text-muted-foreground" />,
-      description: "Scheduled interviews"
-    },
-    {
-      title: "Practice Time",
-      value: "7.5h",
-      icon: <ClockIcon className="h-4 w-4 text-muted-foreground" />,
-      description: "This month"
-    }
-  ];
+  const router = useRouter();
+  const { user } = useUser();
+  const firstName = user?.firstName || 'there';
 
   return (
-    <div className="p-5 md:p-10 max-w-7xl mx-auto" >
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-       
-          <h2 className="font-bold text-3xl text-primary">Interview Dashboard</h2>
-          <p className="text-muted-foreground">Create and track your AI mockup interviews</p>
-      
-        
-
+    <div className="mx-auto max-w-7xl px-5 py-12 md:px-10 md:py-16">
+      {/* Masthead */}
+      <div className="animate-stagger">
+        <p className="eyebrow">Welcome back</p>
+        <h1 className="font-display text-display mt-3 text-foreground">
+          Hello, {firstName}.
+        </h1>
+        <p className="measure mt-3 text-lg text-muted-foreground">
+          Build a session, rehearse it out loud, and review the notes. Every rep
+          is one fewer surprise in the real room.
+        </p>
       </div>
-      
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {stats.map((stat, index) => (
-          <Card key={index}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {stat.title}
-              </CardTitle>
-              {stat.icon}
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-muted-foreground">{stat.description}</p>
-            </CardContent>
-          </Card>
+
+      {/* Stat ledger */}
+      <div className="mt-12 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border lg:grid-cols-4">
+        {stats.map((s) => (
+          <div key={s.label} className="bg-card p-5 md:p-6">
+            <div className="nums font-display text-4xl text-foreground">
+              {s.value}
+            </div>
+            <div className="mt-2 text-sm font-semibold text-foreground">
+              {s.label}
+            </div>
+            <div className="text-xs text-muted-foreground">{s.note}</div>
+          </div>
         ))}
       </div>
-      
-      {/* Quick Actions and Add New Interview */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <Card className="col-span-1 lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Start a practice session or schedule an interview</CardDescription>
-          </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      
-    
-        <Button  onClick={() => router.push('/dashboard/quick-practice')}  className="w-full" size="lg">
-        
-            <LayoutDashboardIcon className="mr-2 h-4 w-4" /> Quick Practice
-          
-        </Button>
-   
-     
-        <Button onClick={() => router.push('/dashboard/schedule-session')}  variant="outline" className="w-full" size="lg">
-        
-            <CalendarIcon className="mr-2 h-4 w-4" /> Schedule Session
-          
-        </Button>
-     
-    
-          </CardContent>
-        </Card>
-        
+
+      {/* Actions */}
+      <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="rounded-lg border border-border bg-secondary/40 p-6 lg:col-span-2 md:p-8">
+          <p className="eyebrow">Jump in</p>
+          <h2 className="font-display mt-2 text-2xl text-foreground">
+            Start a session
+          </h2>
+          <p className="measure mt-2 text-sm text-muted-foreground">
+            Warm up with a quick set, or book a focused slot when you have time to
+            go deep.
+          </p>
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            <Button
+              size="lg"
+              className="sm:flex-1"
+              onClick={() => router.push('/dashboard/quick-practice')}
+            >
+              <Zap className="h-4 w-4" />
+              Quick practice
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              className="sm:flex-1"
+              onClick={() => router.push('/dashboard/schedule-session')}
+            >
+              <CalendarDays className="h-4 w-4" />
+              Schedule a session
+            </Button>
+          </div>
+        </div>
+
         <AddNewInterview />
       </div>
-      
-      {/* Interview History Tabs */}
-      <Tabs defaultValue="all" className="w-full">
-      
-        
-        <TabsContent value="all">
-          <InterviewList />
-        </TabsContent>
-        
-        <TabsContent value="completed">
-          <InterviewList  />
-        </TabsContent>
-        
-        <TabsContent value="scheduled">
-          <InterviewList  />
-        </TabsContent>
-      </Tabs>
+
+      {/* History */}
+      <div className="mt-14">
+        <InterviewList />
+      </div>
     </div>
   );
 }

@@ -50,44 +50,41 @@ function QuestionsSection({ mockInterviewQuestion = [], activeQuestionIndex, set
 
       {/* Current Question Display */}
       <div className="space-y-4">
-        <div className="flex items-start justify-between">
-          <h3 className="text-lg font-medium">Question {activeQuestionIndex + 1}</h3>
+        <div className="flex items-start justify-between gap-3">
+          <span className="eyebrow pt-1">Question {activeQuestionIndex + 1}</span>
           <button
             onClick={() => {
               const questionText =
-                questions[activeQuestionIndex]?.question || 
-                questions[activeQuestionIndex]?.Question || 
+                questions[activeQuestionIndex]?.question ||
+                questions[activeQuestionIndex]?.Question ||
                 "No question available";
               textToSpeech(questionText);
             }}
-            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
+            className="flex shrink-0 items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:border-primary hover:text-primary"
           >
             <Volume2 className="h-4 w-4" />
             <span className="hidden sm:inline">Listen</span>
           </button>
         </div>
 
-        <div className="text-lg">
-          {/* Display the question regardless of case (question or Question) */}
-          {questions[activeQuestionIndex]?.question || 
-           questions[activeQuestionIndex]?.Question || 
+        <p className="font-display text-2xl leading-snug text-foreground">
+          {questions[activeQuestionIndex]?.question ||
+           questions[activeQuestionIndex]?.Question ||
            "No question available"}
-        </div>
+        </p>
       </div>
 
       {/* Note Section */}
-      <Card className="bg-blue-50 border-blue-200 dark:bg-blue-950 dark:border-blue-900">
-        <CardContent className="pt-6">
-          <div className="flex items-center gap-2 text-blue-800 dark:text-blue-300 mb-2">
-            <Lightbulb className="h-4 w-4" />
-            <span className="font-medium">NOTE:</span>
-          </div>
-          <p className="text-sm text-blue-700 dark:text-blue-300">
-            {process.env.NEXT_PUBLIC_QUESTION_NOTE || 
+      <div className="flex gap-3 rounded-lg border border-border bg-secondary/50 p-4">
+        <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+        <div>
+          <span className="eyebrow">Note</span>
+          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+            {process.env.NEXT_PUBLIC_QUESTION_NOTE ||
              "Take your time to formulate a comprehensive answer. Speak clearly and confidently."}
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
